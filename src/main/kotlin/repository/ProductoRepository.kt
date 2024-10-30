@@ -21,14 +21,13 @@ class ProductoRepository {
         categoria: String,
         precioSinIva: Double,
         descripcionProducto: String,
-        idProveedor: Long,
+        idProveedor: Long?,
         nombreProveedor: String,
         direccionProducto: String
     ) {
         val categoria = productoService.checkCategory(categoria)
         val nombreProducto = productoService.checkName(nombreProducto)
         val nombreProveedor = proveedorService.checkName(nombreProveedor)
-        val idProducto = productoService.idCreate(categoria, nombreProducto, nombreProveedor)
         val precioConIva = productoService.calcPrecio_iva(precioSinIva)
         val fecha = productoService.date()
         val proveedor = Proveedor(idProveedor, nombreProveedor,direccionProducto, null)
@@ -42,6 +41,7 @@ class ProductoRepository {
             em.transaction.commit()
         } catch (e: Exception) {
             em.transaction.rollback()
+            println("No se ha podido introducir el producto")
         } finally {
             em.close()
         }
@@ -105,24 +105,23 @@ class ProductoRepository {
     fun getProductosConStock() {
         val em = getEntityManager()
 
-        try {
-
-        } catch (e: Exception) {
-            em.transaction.rollback()
-        } finally {
-            em.close()
+        val q = em.createQuery("FROM Producto where stock > 0", Producto::class.java)
+        val productos = q.resultList
+        productos.forEach {
+            println(it)
         }
+        em.close()
     }
 
     fun getProductosSinStock() {
         val em = getEntityManager()
 
-        try {
-
-        } catch (e: Exception) {
-            em.transaction.rollback()
-        } finally {
-            em.close()
+        val q = em.createQuery("FROM Producto where stock = 0", Producto::class.java)
+        val productos = q.resultList
+        productos.forEach {
+            println(it)
         }
+        em.close()
+
     }
 }
